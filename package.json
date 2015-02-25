@@ -1,0 +1,11 @@
+{
+    "name": "utils-for-brackets",
+    "title": "Brackets Utilities",
+    "description": "General updates.",
+    "version": "1.0.0",
+    "author": "Cuong Tran <cuong@nete.com>",
+    "license": "MIT",
+    "engines": {
+        "brackets": ">=0.24.0"
+    },
+}
