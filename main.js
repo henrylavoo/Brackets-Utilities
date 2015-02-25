@@ -12,29 +12,39 @@ define(function (require, exports, module) {
         FileSystem = brackets.getModule("filesystem/FileSystem"),
         PreferencesManager = brackets.getModule("preferences/PreferencesManager"),
         prefs = PreferencesManager.getExtensionPrefs("nete"),
-        stateManager = PreferencesManager.stateManager.getPrefixedSystem("nete");
+        stateManager = PreferencesManager.stateManager.getPrefixedSystem("nete"),
+		AppInit = brackets.getModule("utils/AppInit");
     
     // Preferences
     prefs.definePreference("error-color", "string", "#FFFF00");
-	prefs.definePreference("fade-pane", "string", "0.7");
+	prefs.definePreference("fade-pane", "string", "true"); // fade is on by default
     
     function initSettings(prefs) {
-        console.log('init');
-        console.log(prefs);
         $('#error-color').val(prefs.get('error-color'));
 		$('input[value="'+prefs.get('fade-pane')+'"]').attr('checked', 'checked');
 		console.log(prefs.get('fade-pane'));
     }
+	
+	AppInit.appReady(function(){
+		console.log(prefs["fade-pane"]);
+		initSettings(prefs);
+		if (prefs.get("fade-pane") == 'true') { // turn fade on
+			$('.view-pane').removeClass('nofade');
+		} else { // turn fade off
+			console.log('fade off');
+			$('.view-pane').addClass('nofade');
+		}
+		// import style sheet
+		ExtensionUtils.loadStyleSheet(module, 'less/main.less');
+	});
+
 
     // Thirdparty libraries    
     var colorpicker = require('jquery.minicolors.min');
     
     // extension path
     var path = ExtensionUtils.getModulePath(module);
-    
-    
-    // import style sheet
-    ExtensionUtils.loadStyleSheet(module, 'less/main.less');
+
     
     // preferences template
     var prefHTML = require("text!tpls/prefs.html");
@@ -42,10 +52,9 @@ define(function (require, exports, module) {
     // color settings
     var file = FileSystem.getFileForPath(path + 'less/variables.less');
     
-    function setColorSettings(settings) {
+    function setSettings(settings) {
 		console.log('Set color settings.');
-        var cssSettings = '@error-color: ' + settings["error-color"] + ';\n'
-						 + '@fade-pane: ' + settings["fade-pane"] + ';\n';
+        var cssSettings = '@error-color: ' + settings["error-color"] + ';\n';
         prefs.set('error-color', settings["error-color"]);
 		prefs.set('fade-pane', settings["fade-pane"]);
 
@@ -53,12 +62,10 @@ define(function (require, exports, module) {
 
         ExtensionUtils.addEmbeddedStyleSheet('.cm-error {background-color: ' + settings["error-color"] + '!important}');
 		
-		
-		if (settings["fade-pane"] == '1!important') {
-			ExtensionUtils.addEmbeddedStyleSheet('.view-pane {opacity: ' + settings["fade-pane"] + '}');
-		} else {
-			ExtensionUtils.addEmbeddedStyleSheet('.view-pane {opacity: ' + settings["fade-pane"] + '!important}');
-			ExtensionUtils.addEmbeddedStyleSheet('.active-pane {opacity: 1!important}');
+		if (settings["fade-pane"] == 'true') { // turn fade on
+			$('.view-pane').removeClass('nofade');
+		} else { // turn fade off
+			$('.view-pane').addClass('nofade');
 		}
 
         stateManager.save();
@@ -77,8 +84,9 @@ define(function (require, exports, module) {
                 var settings = {
                     'error-color' : $('#error-color', $dialog).val(),
 					'fade-pane' : $('input[name="fade-pane"]:checked', $dialog).val()
-                };                
-                setColorSettings(settings);
+                };     
+				console.log($('input[name="fade-pane"]:checked', $dialog).val());
+                setSettings(settings);
             }
         });
         
