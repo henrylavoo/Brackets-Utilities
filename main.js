@@ -16,7 +16,7 @@ define(function (require, exports, module) {
     
     // Preferences
     prefs.definePreference("error-color", "string", "#FFFF00");
-	prefs.definePreference("fade-pane", "string", "1!important");
+	prefs.definePreference("fade-pane", "string", "0.7");
     
     function initSettings(prefs) {
         console.log('init');
