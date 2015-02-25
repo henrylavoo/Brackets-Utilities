@@ -16,11 +16,14 @@ define(function (require, exports, module) {
     
     // Preferences
     prefs.definePreference("error-color", "string", "#FFFF00");
+	prefs.definePreference("fade-pane", "string", "1!important");
     
     function initSettings(prefs) {
         console.log('init');
         console.log(prefs);
         $('#error-color').val(prefs.get('error-color'));
+		$('input[value="'+prefs.get('fade-pane')+'"]').attr('checked', 'checked');
+		console.log(prefs.get('fade-pane'));
     }
 
     // Thirdparty libraries    
@@ -40,12 +43,23 @@ define(function (require, exports, module) {
     var file = FileSystem.getFileForPath(path + 'less/variables.less');
     
     function setColorSettings(settings) {
-        var cssSettings = '@error-color: ' + settings["error-color"] + ';\n';
+		console.log('Set color settings.');
+        var cssSettings = '@error-color: ' + settings["error-color"] + ';\n'
+						 + '@fade-pane: ' + settings["fade-pane"] + ';\n';
         prefs.set('error-color', settings["error-color"]);
+		prefs.set('fade-pane', settings["fade-pane"]);
 
         file.write(cssSettings, {blind: true});
 
-        ExtensionUtils.addEmbeddedStyleSheet('.cm-error {background-color: ' + settings["error-color"] + '}');
+        ExtensionUtils.addEmbeddedStyleSheet('.cm-error {background-color: ' + settings["error-color"] + '!important}');
+		
+		
+		if (settings["fade-pane"] == '1!important') {
+			ExtensionUtils.addEmbeddedStyleSheet('.view-pane {opacity: ' + settings["fade-pane"] + '}');
+		} else {
+			ExtensionUtils.addEmbeddedStyleSheet('.view-pane {opacity: ' + settings["fade-pane"] + '!important}');
+			ExtensionUtils.addEmbeddedStyleSheet('.active-pane {opacity: 1!important}');
+		}
 
         stateManager.save();
     }
@@ -61,9 +75,9 @@ define(function (require, exports, module) {
         dialog.done(function (buttonId) {
             if (buttonId === 'ok') {
                 var settings = {
-                    'error-color' : $('#error-color', $dialog).val()
-                };
-                
+                    'error-color' : $('#error-color', $dialog).val(),
+					'fade-pane' : $('input[name="fade-pane"]:checked', $dialog).val()
+                };                
                 setColorSettings(settings);
             }
         });
